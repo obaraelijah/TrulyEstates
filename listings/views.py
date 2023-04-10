@@ -23,7 +23,7 @@ def listing(request, pk):
     return render(request, "listings/listing.html", context)
 
 def search(request):
-    listings = Listing.objects.order_by("-list-date").filter(is_published=True)
+    listings = Listing.objects.order_by("-list_date").filter(is_published=True)
     
     #serch by keyword
     keywords = request.GET.get('keywords')
