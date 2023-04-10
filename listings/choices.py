@@ -24,7 +24,7 @@ price_choices = {
     "10000": "10k+",
 }
 
-location_choices = {
+state_choices = {
     "NAIROBI": "Nairobi",
     "MOMBASA": "Mombasa",
     "Kisii": "Kisii",
