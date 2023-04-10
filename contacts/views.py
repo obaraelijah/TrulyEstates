@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from .models import Contact
 from django.contrib import messages
 from django.core.mail import send_mail
+
 def contacts(request):
     if request.method == 'POST':
        listing_id = request.POST['listing_id']
