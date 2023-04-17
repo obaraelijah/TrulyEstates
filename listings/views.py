@@ -1,13 +1,15 @@
 from django.shortcuts import render, get_object_or_404
 from .models import Listing
-from django.core.paginator import Paginator
-from django.db.models import Q
-from .choices import bedroom_choices,price_choices,state_choices
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
+
+from .choices import price_choices, bedroom_choices, state_choices
+
 
 def index(request):
     listings = Listing.objects.order_by("-list_date")
     paginator = Paginator(listings, 1)
-    page= request.GET.get("page")
+    page = request.GET.get('page')
     paged_listings = paginator.get_page(page)
     context = {
         "listings": paged_listings
@@ -20,44 +22,57 @@ def listing(request, listing_id):
     context = {
         "listing": listing
     }
-    print(listing_id)
     return render(request, "listings/listing.html", context)
 
 
 def search(request):
-    listings = Listing.objects.order_by("-list_date").filter(is_published=True)
-    
-    #serch by keyword
-    keywords = request.GET.get('keywords')
-    if keywords:
-        listings = listings.filter(description__icontains=keywords)
-    
-    #search by city or state
-    state = request.GET.get('state')
-    city = request.GET.get('city')
-    if state or city:
-        q =Q()
-        if state:
-            q |= Q(state__iexact=state)
+    queryset_list = Listing.objects.order_by(
+        "-list_date").filter(is_published=True)
+
+
+# SEARCH BY KEYWORD
+    if 'keywords' in request.GET:
+        keywords = request.GET['keywords']
+        if keywords:
+            queryset_list = queryset_list.filter(
+                description__icontains=keywords)
+
+
+# SEARCH BY CITY
+    if 'city' in request.GET:
+        city = request.GET['city']
         if city:
-            q |= Q(city__iexact=city)
-        listings = listings.filter(q)
-        
-    #search by bedrooms
-    bedrooms = request.GET.get('bedrooms')
-    if bedrooms:
-        listings = listings.filter(bedrooms__lte=bedrooms)
-        
-    #search by price
-    price = request.GET.get('price')
-    if price:
-        listings = listings.filter(price__lte=price)
-        
+            queryset_list = queryset_list.filter(
+                city__iexact=city)
+
+# SEARCH BY address
+    if 'state' in request.GET:
+        city = request.GET['state']
+        if city:
+            queryset_list = queryset_list.filter(
+                address__iexact=city)
+
+
+# SEARCH BY bedrooms
+    if 'bedrooms' in request.GET:
+        bedrooms = request.GET['bedrooms']
+        if bedrooms:
+            queryset_list = queryset_list.filter(
+                bedrooms__lte=bedrooms)
+
+
+# SEARCH BY price
+    if 'price' in request.GET:
+        price = request.GET['price']
+        if price:
+            queryset_list = queryset_list.filter(
+                price__lte=price)
+
     context = {
         "state_choices": state_choices,
-        "price_choices": price_choices,
         "bedroom_choices": bedroom_choices,
-        "listings": listings,
-        'values': {k: v for k, v in request.GET.items() if v}
+        "price_choices": price_choices,
+        "listings": queryset_list,
+        "values": request.GET
     }
-    return render(request,  "listings/search.html", context)
+    return render(request, "listings/search.html", context)
