@@ -15,12 +15,14 @@ def index(request):
     return render(request, "listings/index.html", context)
 
 
-def listing(request, pk):
-    listing = get_object_or_404(Listing, pk )
+def listing(request, listing_id):
+    listing = get_object_or_404(Listing, pk=listing_id)
     context = {
         "listing": listing
     }
+    print(listing_id)
     return render(request, "listings/listing.html", context)
+
 
 def search(request):
     listings = Listing.objects.order_by("-list_date").filter(is_published=True)
